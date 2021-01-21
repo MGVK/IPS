@@ -24,5 +24,5 @@ while True:
     EtherHeader(frame).dump(1)
     IPHeader(frame).dump(1)
 
-# disabled promiscuous modehttps://github.com/reider-roque/packet_sniffer
+# disabled promiscuous mode
 s.ioctl(socket.SIO_RCVALL, socket.RCVALL_OFF)
