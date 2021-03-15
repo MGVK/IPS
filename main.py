@@ -1,28 +1,77 @@
-import socket
+import logging
 
-from packet_sniffer.packet_sniffer import IPHeader, TCPPacket, EtherHeader, TCPHeader, TCPFlags, IPFlags
+from scapy.layers.inet import IP, ICMP, TCP
+import scapy.all as scapy
 
-HOST = "172.28.208.1"  # wsl
+l = logging.getLogger("scapy.runtime")
+l.setLevel(49)
 
-# create a raw socket and bind it to the public interface
-s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_IP)
-s.bind((HOST, 0))
+import os, sys, netfilterqueue, socket
+from scapy.all import *
 
-# Include IP headers
-s.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
 
-# receive all packages
-s.ioctl(socket.SIO_RCVALL, socket.RCVALL_ON)
+def process(payload):
+    data = payload.get_payload()
+    pkt = IP(data)
+    print(pkt.mysummary())
+    if static_filter(data):
+        print("Accepting!")
+        payload.accept()
+    else:
+        print("Dropping!")
+        payload.drop()
 
-# receive a package
 
-while True:
-    recv = s.recv(4096)
-    frame = recv[0]
+def static_filter(data):
+    pkt = IP(data)
+    proto = pkt.proto
+    print(data)
+    print(pkt.fields)
+    verdict = False
 
-    print(frame)
-    EtherHeader(frame).dump(1)
-    IPHeader(frame).dump(1)
+    if proto is 0x01:
+        print("It's an ICMP packet")
+        verdict = False
+    # else:6
+    #     print("It's an other packet")
+    #     verdict = True
 
-# disabled promiscuous mode
-s.ioctl(socket.SIO_RCVALL, socket.RCVALL_OFF)
+    elif proto is 0x06:
+
+        print("It's an TCP packet")
+        pkt = pkt.getlayer(1)
+        # print(pl)
+        print(pkt.fields)
+        # print(pkt.dport)
+        # port = pkt.fields['dport']
+        # print('DPORT is ' + str(port))
+        #
+        # if int(port) == 8080:
+        #     verdict = True
+        # else:
+        #     verdict = False
+
+    else:
+        print("It's an unknown proto! " + str(proto))
+        verdict = False
+
+    return verdict
+
+
+def main():
+    os.system("iptables -t nat -I PREROUTING -d 192.168.2.15 -j NFQUEUE --queue-num 1")
+
+    q = netfilterqueue.NetfilterQueue()
+    q.bind(1, process)
+
+    try:
+        print('starting')
+        q.run()
+    except:
+        print('exiting')
+        q.unbind()
+        os.system("iptables -t nat -D PREROUTING -d 192.168.2.15 -j NFQUEUE --queue-num 1")
+        sys.exit(1)
+
+
+main()
