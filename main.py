@@ -42,6 +42,13 @@ def static_filter(data):
         pkt = pkt.getlayer(1)
         # print(pl)
         print(pkt.fields)
+
+        if pkt.fields['dport'] == 9090:
+            verdict = True
+            print('Port is 9090!')
+        else:
+            verdict = False
+            print('Port is not 9090! :(')
         # print(pkt.dport)
         # port = pkt.fields['dport']
         # print('DPORT is ' + str(port))
