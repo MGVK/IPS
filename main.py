@@ -1,8 +1,10 @@
+import concurrent
 import logging
 
 from scapy.layers.inet import IP, ICMP, TCP
 import threading
 from scapy.all import wrpcap
+from concurrent.futures.thread import ThreadPoolExecutor
 
 l = logging.getLogger("scapy.runtime")
 l.setLevel(49)
@@ -15,10 +17,16 @@ DIRECTION_OUTPUT = 'output'
 
 common_count = 0
 sessions_count = 0
-debug_enabled = True
+
+info_enabled = True
+debug_enabled = False
+output_enabled = True
+
 last_pkt = None
 
 tcp_sessions = list()
+executors = {}
+executor = None
 
 
 class TCPSession(object):
@@ -29,12 +37,15 @@ class TCPSession(object):
         self.pkts.append(pkt)
         self.session_number = number
 
-    def add_if_match(self, pkt):
+    def add_if_match(self, tcp_pkt):
         # debug(type(pkt))
-        if pkt is not None and (len(self.pkts) == 0
-                                or self.pkts[-1].answers(pkt)
-                                or pkt.answers(self.pkts[-1])):
-            self.pkts.append(pkt)
+        if tcp_pkt is not None and (len(self.pkts) == 0
+                                    or self.pkts[-1].answers(tcp_pkt)
+                                    or tcp_pkt.answers(self.pkts[-1])
+                                    or tcp_pkt.ack == self.pkts[-1].ack
+                                    or tcp_pkt.seq == self.pkts[-1].seq
+                                    or tcp_pkt.seq == self.pkts[-1].ack):
+            self.pkts.append(tcp_pkt)
             return True
         return False
 
@@ -45,12 +56,12 @@ class TCPSession(object):
         print("\n\n")
 
 
-def parseTCPConnection(direction, data):
+def parseTCPConnection(direction, data, ip_pkt, tcp_pkt):
     global sessions_count
     global tcp_sessions
     global last_pkt
 
-    tcp_pkt = IP(data).getlayer(1)
+    debug('parse tcp')
 
     tcp_pkt.dport = tcp_pkt.fields['dport']
     tcp_pkt.sport = tcp_pkt.fields['sport']
@@ -61,65 +72,139 @@ def parseTCPConnection(direction, data):
 
     added = False
 
-    for tcp_session in tcp_sessions:
-        added |= tcp_session.add_if_match(tcp_pkt)
-    if added == 0:
-        sessions_count += 1
-        tcp_sessions.append(TCPSession(tcp_pkt, sessions_count))
-        debug('New session ' + str(sessions_count))
+    with concurrent.futures.ThreadPoolExecutor() as tcp_parser_executor:
+        futures = []
+        for tcp_session in tcp_sessions:
+            futures.append(
+                tcp_parser_executor.submit(tcp_session.add_if_match, tcp_pkt=tcp_pkt)
+            )
+        for future in concurrent.futures.as_completed(futures):
+            added |= future.result()
 
-    for tcp_session in tcp_sessions:
-        tcp_session.print_payload()
+        if not added:
+            sessions_count += 1
+            tcp_sessions.append(TCPSession(tcp_pkt, sessions_count))
+            info('New session ' + str(sessions_count))
+
+    # for tcp_session in tcp_sessions:
+    #     added |= tcp_session.add_if_match(tcp_pkt)
+
+    # for tcp_session in tcp_sessions:
+    # tcp_session.print_payload()
 
 
-def common_process(payload, direction):
+def common_worker(payload, direction):
     global common_count
     data = payload.get_payload()
     pkt = IP(data)
-
-    debug('--------------------------------')
+    tcp_pkt = None
+    allow = False
 
     if pkt.proto == 0x06:  # TCP
-        parseTCPConnection(direction, data)
 
-        pkt = pkt.getlayer(1)
-        common_count += 1
-        debug(str(common_count) + (">>>" if direction == DIRECTION_INPUT else "<<<") + str(pkt.fields))
-        debug(pkt.fields['flags'])
-        debug("DATA:" + str(pkt.payload))
+        tcp_pkt = pkt.getlayer(1)
+
+        if direction == DIRECTION_INPUT and not static_filter(direction, data, ip_pkt=pkt, tcp_pkt=tcp_pkt):
+            allow = False
+
+        parseTCPConnection(direction, data, pkt, tcp_pkt)
+
+    else:
+
+        if direction == DIRECTION_INPUT and not static_filter(direction, data, ip_pkt=pkt):
+            allow = False
+
+    allow = True
+
+    return {
+        'verdict': allow,
+        'ip_pkt': pkt,
+        'tcp_pkt': tcp_pkt,
+        'original_payload': payload}
+
+
+def common_process(payload, direction):
+    global executor
+    global executors
+    global common_count
+    common_count += 1
+    executors[str(common_count)] = executor.submit(common_worker, payload=payload, direction=direction)
+    debug(executors)
 
 
 def process_input(payload):
     direction = DIRECTION_INPUT
-    data = payload.get_payload()
-
     common_process(payload, direction)
-
-    if static_filter(direction, data):
-        payload.accept()
-    else:
-        payload.drop()
 
 
 def process_output(payload):
     direction = DIRECTION_OUTPUT
-    data = payload.get_payload()
-
     common_process(payload, direction)
 
-    payload.accept()
+
+class AnalysisThread(threading.Thread):
+
+    def __init__(self):
+        threading.Thread.__init__(self)
+        self._work = False
+
+    def run(self):
+        global executors
+        executor_number = 1
+        info('starting analysis')
+
+        self._work = True
+        while self.is_enabled():
+            while not str(executor_number) in executors:
+                pass
+            executor = executors[str(executor_number)]
+            result = next(concurrent.futures.as_completed([executor])).result()
+            ip_pkt = result['ip_pkt']
+            direction = ip_pkt.direction
+            orig_peayload = result['original_payload']
+
+            debug(str(executor_number) + (">>>" if direction == DIRECTION_INPUT else "<<<") + str(ip_pkt.payload))
+
+            if 'tcp_pkt' in result:
+                tcp_pkt = result['tcp_pkt']
+                debug(ip_pkt.fields['flags'])
+                debug("DATA:" + str(ip_pkt.payload))
+
+            if result['verdict']:
+                orig_peayload.accept()
+            else:
+                orig_peayload.drop()
+
+            executor_number+=1
+
+    def is_enabled(self):
+        return self._work
+
+    def stop(self):
+        self._work = False
+
+
+def output(prefix, s):
+    global output_enabled
+    if output_enabled:
+        print(prefix, s)
+
+
+def info(s):
+    global info_enabled
+    if info_enabled:
+        output("[INFO] ", str(s))
 
 
 def debug(s):
     global debug_enabled
     if debug_enabled:
-        print("[DEBUG] " + str(s))
+        output("[DEBUG] ", str(s))
 
 
-def static_filter(direction, data):
+def static_filter(direction, data, ip_pkt, tcp_pkt=None):
     global common_count
-    pkt = IP(data)
-    proto = pkt.proto
+    proto = ip_pkt.proto
     #    print(data)
     #    print(pkt.fields)
     verdict = False
@@ -129,9 +214,7 @@ def static_filter(direction, data):
 
     elif proto is 0x06:
 
-        pkt = pkt.getlayer(1)
-
-        if pkt.fields['dport'] == 9090:
+        if tcp_pkt.fields['dport'] == 9090:
             verdict = True
         else:
             verdict = True
@@ -143,46 +226,62 @@ def static_filter(direction, data):
 
 
 def start_output():
-    os.system("iptables -t mangle -I POSTROUTING -s 192.168.2.15 -j NFQUEUE --queue-num 1")
-
     q = netfilterqueue.NetfilterQueue()
     q.bind(1, process_output)
 
     try:
-        print('starting output')
+        info('starting output')
         q.run()
     except:
-        print('exiting output')
+        info('exiting output')
         q.unbind()
-        os.system("iptables -t mangle -D POSTROUTING -s 192.168.2.15 -j NFQUEUE --queue-num 1")
+        clear_iptables()
         sys.exit(1)
 
 
 def start_input():
-    os.system("iptables -t raw -I PREROUTING -d 192.168.2.15 -j NFQUEUE --queue-num 0")
     # os.system("iptables -t mangle -I POSTROUTING -s 192.168.2.15 -j NFQUEUE --queue-num 0")
 
     q = netfilterqueue.NetfilterQueue()
     q.bind(0, process_input)
 
     try:
-        print('starting input')
+        info('starting input')
         q.run()
     except:
-        print('exiting input')
+        info('exiting input')
         q.unbind()
-        os.system("iptables -t raw -D PREROUTING -d 192.168.2.15  -j NFQUEUE --queue-num 0")
+        clear_iptables()
         sys.exit(1)
 
 
-def main():
-    os.system("iptables -t nat -F")
+def clear_iptables():
+    os.system("iptables -t raw -D PREROUTING -d 192.168.2.15  -j NFQUEUE --queue-num 0")
+    os.system("iptables -t mangle -D POSTROUTING -s 192.168.2.15 -j NFQUEUE --queue-num 1")
+    os.system("iptables -t raw -F")
     os.system("iptables -t mangle -F")
+
+
+def init_iptables():
+    os.system("iptables -t raw -I PREROUTING -d 192.168.2.15 -j NFQUEUE --queue-num 0")
+    os.system("iptables -t mangle -I POSTROUTING -s 192.168.2.15 -j NFQUEUE --queue-num 1")
+
+
+def main():
+    clear_iptables()
+    init_iptables()
+
+    global executor
+    executor = ThreadPoolExecutor()
 
     output_thread = threading.Thread(target=start_output)
     output_thread.start()
 
+    analysis_thread = AnalysisThread()
+    analysis_thread.start()
+
     start_input()
+    analysis_thread.stop()
 
     sys.exit(1)
 
