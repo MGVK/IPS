@@ -19,13 +19,13 @@ common_count = 0
 sessions_count = 0
 
 info_enabled = True
-debug_enabled = False
-output_enabled = True
+debug_enabled = 1
+output_enabled = 0
 
 last_pkt = None
 
 tcp_sessions = list()
-executors = {}
+executors = list()
 executor = None
 
 
@@ -46,8 +46,8 @@ class TCPSession(object):
                                     or tcp_pkt.seq == self.pkts[-1].seq
                                     or tcp_pkt.seq == self.pkts[-1].ack):
             self.pkts.append(tcp_pkt)
-            return True
-        return False
+            return self.session_number
+        return 0
 
     def print_payload(self):
         print('SESSION ' + str(self.session_number))
@@ -57,11 +57,11 @@ class TCPSession(object):
 
 
 def parseTCPConnection(direction, data, ip_pkt, tcp_pkt):
-    global sessions_count
+    # global sessions_count
     global tcp_sessions
     global last_pkt
 
-    debug('parse tcp')
+    # debug('parse tcp ' + str(direction))
 
     tcp_pkt.dport = tcp_pkt.fields['dport']
     tcp_pkt.sport = tcp_pkt.fields['sport']
@@ -72,22 +72,22 @@ def parseTCPConnection(direction, data, ip_pkt, tcp_pkt):
 
     added = False
 
-    with concurrent.futures.ThreadPoolExecutor() as tcp_parser_executor:
-        futures = []
-        for tcp_session in tcp_sessions:
-            futures.append(
-                tcp_parser_executor.submit(tcp_session.add_if_match, tcp_pkt=tcp_pkt)
-            )
-        for future in concurrent.futures.as_completed(futures):
-            added |= future.result()
+    # with concurrent.futures.ThreadPoolExecutor() as tcp_parser_executor:
+    #     futures = []
+    #     for tcp_session in tcp_sessions:
+    #         futures.append(
+    #             tcp_parser_executor.submit(tcp_session.add_if_match, tcp_pkt=tcp_pkt)
+    #         )
+    #
+    #     if added == 0:
+    #         # sessions_count += 1
+    #         tcp_sessions.append(TCPSession(tcp_pkt, len(tcp_sessions)))
+    #         # info('New session ' + str(sessions_count))
+    #     # else:
+    # info('Session ' + str(added))
 
-        if not added:
-            sessions_count += 1
-            tcp_sessions.append(TCPSession(tcp_pkt, sessions_count))
-            info('New session ' + str(sessions_count))
-
-    # for tcp_session in tcp_sessions:
-    #     added |= tcp_session.add_if_match(tcp_pkt)
+    for tcp_session in tcp_sessions:
+        added |= tcp_session.add_if_match(tcp_pkt)
 
     # for tcp_session in tcp_sessions:
     # tcp_session.print_payload()
@@ -116,20 +116,34 @@ def common_worker(payload, direction):
 
     allow = True
 
+    payload.accept()
+
     return {
         'verdict': allow,
         'ip_pkt': pkt,
         'tcp_pkt': tcp_pkt,
-        'original_payload': payload}
+        'original_payload': payload,
+        'direction': direction}
+
+
+def demo_worker(payload):
+    # f = IP(payload.get_payload())
+    payload.accept()
 
 
 def common_process(payload, direction):
     global executor
     global executors
-    global common_count
-    common_count += 1
-    executors[str(common_count)] = executor.submit(common_worker, payload=payload, direction=direction)
-    debug(executors)
+    # global common_count
+    # loc_common_count = common_count + 1
+    # common_count = loc_common_count
+    # executors[str(loc_common_count)] = executor.submit(common_worker, payload=payload, direction=direction)
+    # executors.append(executor.submit(common_worker, payload=payload, direction=direction))
+    # debug("added executor " + str(common_count))
+    # debug(executors)
+    # executor.submit(demo_worker, payload=payload)
+    # threading.Thread(target=demo_worker, args=[payload]).start()
+    payload.accept()
 
 
 def process_input(payload):
@@ -153,29 +167,33 @@ class AnalysisThread(threading.Thread):
         executor_number = 1
         info('starting analysis')
 
-        self._work = True
+        self._work = False
         while self.is_enabled():
-            while not str(executor_number) in executors:
+            # debug('### waiting for executor ' + str(executor_number))
+            while len(executors) <= executor_number:
                 pass
-            executor = executors[str(executor_number)]
+            # debug('### arrived executor ' + str(executor_number))
+            executor = executors[executor_number]
             result = next(concurrent.futures.as_completed([executor])).result()
+            # debug('### completed executor ' + str(executor_number))
             ip_pkt = result['ip_pkt']
-            direction = ip_pkt.direction
+            direction = result['direction']
             orig_peayload = result['original_payload']
 
-            debug(str(executor_number) + (">>>" if direction == DIRECTION_INPUT else "<<<") + str(ip_pkt.payload))
+            # debug(str(executor_number) + (">>>" if direction == DIRECTION_INPUT else "<<<") + str(ip_pkt.payload))
 
-            if 'tcp_pkt' in result:
-                tcp_pkt = result['tcp_pkt']
-                debug(ip_pkt.fields['flags'])
-                debug("DATA:" + str(ip_pkt.payload))
+            # if 'tcp_pkt' in result:
+            # tcp_pkt = result['tcp_pkt']
+            # if not tcp_pkt is None:
+            # debug("FLAGS:" + str(tcp_pkt.fields['flags']))
+            # debug("DATA:" + str(tcp_pkt.payload))
 
             if result['verdict']:
                 orig_peayload.accept()
             else:
                 orig_peayload.drop()
 
-            executor_number+=1
+            executor_number += 1
 
     def is_enabled(self):
         return self._work
