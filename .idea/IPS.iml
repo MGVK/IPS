@@ -3,9 +3,18 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/venv" />
-      <excludeFolder url="file://$MODULE_DIR$/venvlinux" />
+      <excludeFolder url="file://$MODULE_DIR$/venvlinux3.6" />
+      <excludeFolder url="file://$MODULE_DIR$/Case3-D3V_41" />
+      <excludeFolder url="file://$MODULE_DIR$/webgoat" />
+      <excludeFolder url="file://$MODULE_DIR$/tmp" />
+      <excludeFolder url="file://$MODULE_DIR$/site" />
+      <excludeFolder url="file://$MODULE_DIR$/pipeproxy" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.6 (IPS)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+  <component name="PyDocumentationSettings">
+    <option name="format" value="PLAIN" />
+    <option name="myDocStringFormat" value="Plain" />
   </component>
 </module>
