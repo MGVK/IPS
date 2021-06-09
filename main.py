@@ -53,14 +53,15 @@ def start(m):
     tcp_sessions = m[4]
     cb_listener = m[5]
     callbacks = m[6]
+    local_ip = m[7]
 
     if direction == Constants.DIRECTION_INPUT:
 
-        cmd = ("iptables -t raw -I PREROUTING -d 192.168.2.15 "
+        cmd = ("iptables -t raw -I PREROUTING -d "+local_ip+
                    "-m statistic --mode nth --every " + str(sum)
                    + " --packet " + str(n) + " -j NFQUEUE --queue-num " + str(n))
 
-        cmd2 = ("iptables -t raw -I PREROUTING -d 192.168.2.15 "
+        cmd2 = ("iptables -t raw -I PREROUTING -d "+local_ip+
                    "-m statistic --mode nth --every " + str(sum)
                    + " --packet " + str(n) + " -j LOG --log-prefix 'INPUT!!!NFQUEUE"+str(n)+"of"+str(sum)
                 +">>>' --log-level 4")
@@ -71,11 +72,11 @@ def start(m):
 
     else:
 
-        cmd = ("iptables -t mangle -I POSTROUTING -s 192.168.2.15 "
+        cmd = ("iptables -t mangle -I POSTROUTING -s "+local_ip+
                    "-m statistic --mode nth --every " + str(sum)
                    + " --packet " + str(n) + " -j NFQUEUE --queue-num " + str(sum + n))
 
-        cmd2 = ("iptables -t mangle -I POSTROUTING -s 192.168.2.15 "
+        cmd2 = ("iptables -t mangle -I POSTROUTING -s "+local_ip+
                    "-m statistic --mode nth --every " + str(sum)
                    + " --packet " + str(n) + "  -j LOG --log-prefix 'OUTPUT!!!NFQUEUE"+str(n)+"of"+str(sum)
                 +">>>' --log-level 4")
@@ -97,21 +98,26 @@ def start(m):
         sys.exit(1)
 
 
-def clear_iptables():
-    os.system("iptables -t raw -D PREROUTING -d 192.168.2.15  -j NFQUEUE --queue-num 0")
-    os.system("iptables -t mangle -D POSTROUTING -s 192.168.2.15 -j NFQUEUE --queue-num 1")
+def clear_iptables(local_ip):
+    os.system("iptables -t raw -D PREROUTING -d "+local_ip+"  -j NFQUEUE --queue-num 0")
+    os.system("iptables -t mangle -D POSTROUTING -s "+local_ip+" -j NFQUEUE --queue-num 1")
     os.system("iptables -t raw -F")
     os.system("iptables -t mangle -F")
 
 
-def init_iptables():
-    os.system("iptables -t raw -I PREROUTING -d 192.168.2.15 -j LOG --log-prefix 'INPUT!!!IPS>>>' --log-level 4")
-    os.system("iptables -t mangle -I POSTROUTING -s 192.168.2.15 -j LOG --log-prefix 'OUTPUT!!!IPS>>>' --log-level 4")
+def init_iptables(local_ip):
+    os.system("iptables -t raw -I PREROUTING -d "+local_ip+" -j LOG --log-prefix 'INPUT!!!IPS>>>' --log-level 4")
+    os.system("iptables -t mangle -I POSTROUTING -s "+local_ip+" -j LOG --log-prefix 'OUTPUT!!!IPS>>>' --log-level 4")
 
 
 def main():
-    clear_iptables()
-    init_iptables()
+    local_ip = sys.argv[1]
+
+    if not local_ip:
+        sys.exit(1)
+
+    clear_iptables(local_ip)
+    init_iptables(local_ip)
     process_count = 2
 
     from multiprocessing import Manager
