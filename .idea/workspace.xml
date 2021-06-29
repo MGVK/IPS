@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="54d92a07-d51e-496f-8123-1ceda2f30d89" name="Default Changelist" comment="args added">
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Case3-D3V_41/bus/bro_wrapper.py" beforeDir="false" afterPath="$PROJECT_DIR$/Case3-D3V_41/bus/bro_wrapper.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Case3-D3V_41/bus/config" beforeDir="false" afterPath="$PROJECT_DIR$/Case3-D3V_41/bus/config" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Case3-D3V_41/bus/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/Case3-D3V_41/bus/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Case3-D3V_41/bus/preprocessing.py" beforeDir="false" afterPath="$PROJECT_DIR$/Case3-D3V_41/bus/preprocessing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Case3-D3V_41/model/files/KDDTest+.arff" beforeDir="false" afterPath="$PROJECT_DIR$/Case3-D3V_41/model/files/KDDTest+.arff" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Case3-D3V_41/model/files/KDDTest+.txt" beforeDir="false" afterPath="$PROJECT_DIR$/Case3-D3V_41/model/files/KDDTest+.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Case3-D3V_41/model/files/KDDTest-21.arff" beforeDir="false" afterPath="$PROJECT_DIR$/Case3-D3V_41/model/files/KDDTest-21.arff" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Case3-D3V_41/model/files/KDDTest-21.txt" beforeDir="false" afterPath="$PROJECT_DIR$/Case3-D3V_41/model/files/KDDTest-21.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Case3-D3V_41/model/files/KDDTrain+.arff" beforeDir="false" afterPath="$PROJECT_DIR$/Case3-D3V_41/model/files/KDDTrain+.arff" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Case3-D3V_41/model/files/KDDTrain+.txt" beforeDir="false" afterPath="$PROJECT_DIR$/Case3-D3V_41/model/files/KDDTrain+.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Case3-D3V_41/model/files/KDDTrain+_20Percent.arff" beforeDir="false" afterPath="$PROJECT_DIR$/Case3-D3V_41/model/files/KDDTrain+_20Percent.arff" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Case3-D3V_41/model/files/KDDTrain+_20Percent.txt" beforeDir="false" afterPath="$PROJECT_DIR$/Case3-D3V_41/model/files/KDDTrain+_20Percent.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Case3-D3V_41/model/hackaton_main.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Case3-D3V_41/model/hackaton_main.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Case3-D3V_41/model/predictor.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Case3-D3V_41/model/predictor.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/darpa2gurekddcup.bro" beforeDir="false" afterPath="$PROJECT_DIR$/darpa2gurekddcup.bro" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ips/TCPSession.py" beforeDir="false" afterPath="$PROJECT_DIR$/ips/TCPSession.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ips/common_analyzer.py" beforeDir="false" afterPath="$PROJECT_DIR$/ips/common_analyzer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ips/parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/ips/parser.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitSEFilterConfiguration">
+    <file-type-list>
+      <filtered-out-file-type name="LOCAL_BRANCH" />
+      <filtered-out-file-type name="REMOTE_BRANCH" />
+      <filtered-out-file-type name="TAG" />
+      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
+    </file-type-list>
+  </component>
+  <component name="ProjectId" id="1s26Jj0HGIkyZYuqI0SW7wP36Fd" />
+  <component name="ProjectViewState">
+    <option name="autoscrollFromSource" value="true" />
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="com.intellij.ide.scratch.LRUPopupBuilder$1/New Scratch File" value="Python" />
+    <property name="last.edited.regexp" value="1+or+1%3D1" />
+    <property name="last_opened_file_path" value="/home/mike" />
+    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/Case3-D3V_41" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/ips" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Python.main">
+    <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="IPS" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main.py" />
+      <option name="PARAMETERS" value="192.168.2.15" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="scratch" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="IPS" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$APPLICATION_CONFIG_DIR$/scratches" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$APPLICATION_CONFIG_DIR$/scratches/scratch.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="test" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="IPS" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Python.main" />
+      <item itemvalue="Python.scratch" />
+      <item itemvalue="Python.test" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.main" />
+        <item itemvalue="Python.test" />
+        <item itemvalue="Python.scratch" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="54d92a07-d51e-496f-8123-1ceda2f30d89" name="Default Changelist" comment="" />
+      <created>1620058268253</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1620058268253</updated>
+      <workItem from="1620058269553" duration="5150000" />
+      <workItem from="1620137670442" duration="12392000" />
+      <workItem from="1620318322386" duration="2857000" />
+      <workItem from="1620336855750" duration="40589000" />
+      <workItem from="1620640945391" duration="9578000" />
+      <workItem from="1622489419559" duration="6675000" />
+      <workItem from="1622551113108" duration="2506000" />
+      <workItem from="1622648647632" duration="42744000" />
+      <workItem from="1623234134578" duration="42454000" />
+      <workItem from="1624434320831" duration="9440000" />
+    </task>
+    <task id="LOCAL-00001" summary="sessions works">
+      <created>1620123615291</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1620123615291</updated>
+    </task>
+    <task id="LOCAL-00002" summary="parallel test">
+      <created>1620336219583</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1620336219583</updated>
+    </task>
+    <task id="LOCAL-00003" summary="parallel bad working">
+      <created>1620459117293</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1620459117293</updated>
+    </task>
+    <task id="LOCAL-00004" summary="extreme refactoring">
+      <created>1623255200232</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1623255200232</updated>
+    </task>
+    <task id="LOCAL-00005" summary="args added">
+      <created>1623255588359</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1623255588359</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="sessions works" />
+    <MESSAGE value="parallel test" />
+    <MESSAGE value="parallel bad working" />
+    <MESSAGE value="extreme refactoring" />
+    <MESSAGE value="args added" />
+    <option name="LAST_COMMIT_MESSAGE" value="args added" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <default-breakpoints>
+        <breakpoint type="python-exception">
+          <properties notifyOnTerminate="true" exception="BaseException">
+            <option name="notifyOnTerminate" value="true" />
+          </properties>
+        </breakpoint>
+      </default-breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/IPS$scratch.coverage" NAME="scratch Coverage Results" MODIFIED="1620645460551" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$APPLICATION_CONFIG_DIR$/scratches" />
+    <SUITE FILE_PATH="coverage/IPS$test.coverage" NAME="test Coverage Results" MODIFIED="1622678540005" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/IPS$main.coverage" NAME="main Coverage Results" MODIFIED="1624457047132" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+  </component>
+</project>

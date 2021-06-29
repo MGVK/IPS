@@ -1,0 +1,14 @@
+Metadata-Version: 2.0
+Name: pipeproxy
+Version: 0.7
+Summary: A sort-of-proxy solution for multiprocess communication using Pipe from mulitprocessing.
+Home-page: https://github.com/dRoje/pipe-proxy.git
+Author: Duje Roje
+Author-email: rojeduje@gmail.com
+License: MIT
+Description-Content-Type: UNKNOWN
+Platform: UNKNOWN
+
+UNKNOWN
+
+

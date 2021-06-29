@@ -1,0 +1,11 @@
+#separator \x09
+#set_separator	,
+#empty_field	(empty)
+#unset_field	-
+#path	weird
+#open	2021-04-27-22-53-02
+#fields	ts	uid	id.orig_h	id.orig_p	id.resp_h	id.resp_p	name	addl	notice	peer	source
+#types	time	string	addr	port	addr	port	string	string	bool	string	string
+1619553167.115560	CBPAiB3nJ9yiWixE68	192.168.2.12	63836	192.168.2.15	9090	possible_split_routing	-	F	zeek	-
+1619553167.335309	CBPAiB3nJ9yiWixE68	192.168.2.12	63836	192.168.2.15	9090	data_before_established	-	F	zeek	TCP
+#close	2021-04-27-22-53-02

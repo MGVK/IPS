@@ -1,0 +1,11 @@
+warning: Loading script './darpa2gurekddcup.bro' with legacy extension, support for '.bro' will be removed in Zeek v4.1
+warning in ./darpa2gurekddcup.bro, line 294 and /opt/zeek/share/zeek/base/bif/plugins/./Zeek_ICMP.events.bif.zeek, line 75: use of deprecated 'icmp_echo_request' prototype: Remove in v4.1.  The icmp_info record is replacing icmp_conn. (event(c:connection; icmp:icmp_conn; id:count; seq:count; payload:string;))
+warning in ./darpa2gurekddcup.bro, line 345 and /opt/zeek/share/zeek/base/bif/plugins/./Zeek_ICMP.events.bif.zeek, line 104: use of deprecated 'icmp_echo_reply' prototype: Remove in v4.1.  The icmp_info record is replacing icmp_conn. (event(c:connection; icmp:icmp_conn; id:count; seq:count; payload:string;))
+warning in ./darpa2gurekddcup.bro, line 390 and /opt/zeek/share/zeek/base/bif/plugins/./Zeek_ICMP.events.bif.zeek, line 167: use of deprecated 'icmp_unreachable' prototype: Remove in v4.1.  The icmp_info record is replacing icmp_conn (event(c:connection; icmp:icmp_conn; code:count; context:icmp_context;))
+warning in ./darpa2gurekddcup.bro, line 434 and /opt/zeek/share/zeek/base/bif/plugins/./Zeek_ICMP.events.bif.zeek, line 231: use of deprecated 'icmp_time_exceeded' prototype: Remove in v4.1.  The icmp_info record is replacing icmp_conn (event(c:connection; icmp:icmp_conn; code:count; context:icmp_context;))
+!!! 2 1619531464.133001 63834 9090 192.168.2.12 192.168.2.15 36.027207 tcp 9090 RSTOS0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+!!! 4 1619531505.606938 63834 9090 192.168.2.12 192.168.2.15 4.776936 tcp 9090 RSTOS0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+!!! 3 1619531500.396465 63834 9090 192.168.2.12 192.168.2.15 4.974255 tcp 9090 RSTOS0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+!!! 1 1619531459.022817 63834 9090 192.168.2.12 192.168.2.15 4.880885 tcp 9090 S0 151 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+!!! 5 1619531510.622993 63834 9090 192.168.2.12 192.168.2.15 4.946406 tcp 9090 RSTOS0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+!!! 6 1619531515.812950 63834 9090 192.168.2.12 192.168.2.15 3.875000 tcp 9090 RSTOS0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
