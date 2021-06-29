@@ -1,0 +1,494 @@
+FILE common_analyzer.py
+import re
+
+from netfilterqueue import Packet
+from prometheus_client import Counter
+from scapy.layers.inet import IP, TCP
+from scapy.packet import Raw
+
+from ips.Constants import Constants
+from ips.logger import Logger
+from ips.parser import TCPParser
+
+
+class CommonProcess:
+
+    @staticmethod
+    def common_process(payload,
+                       packets,
+                       tcp_sessions,
+                       cb_listener,
+                       callbacks,
+                       pkt_counter,
+                       ses_counter,
+                       bad_sessions):
+
+        CommonProcess.common_worker(payload,
+                                    packets,
+                                    tcp_sessions,
+                                    cb_listener,
+                                    callbacks,
+                                    pkt_counter,
+                                    ses_counter,
+                                    bad_sessions)
+
+    @staticmethod
+    def common_worker(payload: Packet,
+                      packets: list,
+                      tcp_sessions,
+                      cb_listener,
+                      callbacks: list,
+                      pkt_counter: Counter,
+                      ses_counter: Counter,
+                      bad_sessions: list):
+
+        data = payload.get_payload()
+        pkt = IP(data)
+
+        direction = Constants.DIRECTION_INPUT if pkt.fields['dst'] == '192.168.2.15' else Constants.DIRECTION_OUTPUT
+        tcp_pkt = None
+        allow = True
+        t = 1.5
+        ave = 0
+        sum = 0
+        port = 0
+        proto = 'other'
+        session_number=None
+
+        if pkt.proto == 0x06:  # TCP
+
+            tcp_pkt = pkt.getlayer(1)
+            port = tcp_pkt.fields['dport']
+            proto = 'TCP'
+
+            good_sessions = 0
+
+            for s in tcp_sessions:
+                if s.valid:
+                    sum += s.length
+                    good_sessions += 1
+            ave = sum / good_sessions if good_sessions > 0 else sum
+
+            Logger.debug("AVE: " + str(ave))
+            Logger.debug("COUNT: " + str(good_sessions))
+            Logger.debug("sum" + str(sum))
+
+            session_number = TCPParser.parseTCPConnection(direction, data, pkt, tcp_pkt, tcp_sessions, ses_counter)
+            # Logger.info("curr: "+str(tcp_sessions[session_number].length))
+
+            if ave != 0 and abs(tcp_sessions[session_number].length / ave) > t:
+                Logger.debug("!!! " + str(abs(tcp_sessions[session_number].length / ave)))
+                allow = False
+
+            # allow = CommonProcess.static_filter(data, ip_pkt=pkt, tcp_pkt=tcp_pkt, direction=direction)
+
+
+        else:
+
+            allow = CommonProcess.static_filter(data, ip_pkt=pkt, direction=direction)
+
+        if allow:
+            Logger.debug("Accepted")
+            pkt_counter.labels(protocol=pkt.proto, action='accept', port=port, direction=direction).inc()
+            payload.accept()
+        else:
+            Logger.debug("Dropped!!!")
+            pkt_counter.labels(protocol=pkt.proto, action='drop', port=port, direction=direction).inc()
+            payload.drop()
+            if session_number is not None:
+                tcp_sessions[session_number].valid = False
+
+        return payload
+
+    # @staticmethod
+    # def extractURL(tcp_pkt:TCP):
+    #     if tcp_pkt.haslayer(Raw):
+    #         r = re.search(r'\w+\s/([^\s]+)',str(tcp_pkt.payload.load.decode("utf-8")))
+    #         if r is not None and len(r.groups())>0:
+    #             return r.groups()[0]
+
+    @staticmethod
+    def static_filter(data, ip_pkt, tcp_pkt: TCP = None, direction=None):
+        global common_count
+        proto = ip_pkt.proto
+        #    print(data)
+        #    print(pkt.fields)
+        verdict = True
+
+        if proto is 0x01:
+            verdict = False
+        elif proto is 0x17:
+            verdict = True
+        elif proto is 0x06:
+
+            if direction == Constants.DIRECTION_INPUT and tcp_pkt.fields['dport'] == 8080:
+                verdict = True
+            elif direction == Constants.DIRECTION_INPUT and tcp_pkt.fields['dport'] == 8000:
+                verdict = False
+            else:
+                verdict = True
+
+      #      Logger.debug(tcp_pkt.payload)
+      #      if tcp_pkt.haslayer(Raw):
+
+                # filter 1=1
+#                r = re.search(r'(1(%3D|=)1)', str(tcp_pkt.payload.load.decode("utf-8")))
+ #               if r is not None:
+  #                  Logger.debug("Found " + str(r.groups()))
+   #                 return False
+
+
+        else:
+            verdict &= False
+
+        return verdict
+FILE Constants.py
+class Constants:
+
+    DIRECTION_INPUT = 'input'
+    DIRECTION_OUTPUT = 'output'FILE deep_analyzer.py
+from multiprocessing.context import Process
+
+from ips.logger import Logger
+
+
+class AnalysisProcessor(Process):
+
+    def __init__(self, pairs, sessions, packets, **kwargs):
+        super(AnalysisProcessor, self).__init__()
+        self._work = False
+        self.pairs = pairs
+        self.sessions = sessions
+        self.packets = packets
+        # self.pkt_listener = pkt_listener
+        # self.cb_proxy = cb_proxy
+
+    def run(self):
+        Logger.info('starting analysis')
+
+        last_pkt = 0
+        self._work = True
+        while self.is_enabled():
+            # self.pkt_listener.listen()
+            self.packets_ = self.packets[last_pkt:]
+            last_pkt += len(self.packets_)
+            for result in self.packets_:
+
+                # print(result)
+
+                ip_pkt = result['ip_pkt']
+                direction = result['direction']
+                # cb_id = result['cb_id']
+
+
+                # debug(str(executor_number) + (">>>" if direction == DIRECTION_INPUT else "<<<") + str(ip_pkt.payload))
+
+                # if 'tcp_pkt' in result:
+                # tcp_pkt = result['tcp_pkt']
+                # if not tcp_pkt is None:
+                # debug("FLAGS:" + str(tcp_pkt.fields['flags']))
+                # debug("DATA:" + str(tcp_pkt.payload))
+
+                # if result['verdict']:
+                #     self.cb_proxy[cb_id] = True
+                # else:
+                #     self.cb_proxy[cb_id] = False
+
+                # executor_number += 1
+
+    def is_enabled(self):
+        return self._work
+
+    def stop(self):
+        self._work = False
+FILE __init__.py
+FILE logger.py
+import multiprocessing
+import os
+
+
+class Logger:
+
+    info_enabled = 1
+    debug_enabled = 1
+    output_enabled = 1
+
+    @staticmethod
+    def output(prefix, s):
+        if Logger.output_enabled:
+            print(multiprocessing.current_process().name, prefix, s)
+
+    @staticmethod
+    def info(s):
+        if Logger.info_enabled:
+            Logger.output(" [INFO] ", str(s))
+
+    @staticmethod
+    def debug(s):
+        if Logger.debug_enabled:
+            Logger.output(" [DEBUG] ", str(s))FILE parser.py
+from ips.TCPSession import TCPSession
+from ips.logger import Logger
+
+
+class TCPParser:
+
+    @staticmethod
+    def parseTCPConnection(direction, data, ip_pkt, tcp_pkt, tcp_sessions,ses_counter):
+        # global sessions_count
+        # debug('parse tcp ' + str(direction))
+
+        tcp_pkt.dport = tcp_pkt.fields['dport']
+        tcp_pkt.sport = tcp_pkt.fields['sport']
+
+        tcp_pkt.direction = direction
+
+        session_number = 0
+
+        for tcp_session in tcp_sessions:
+            session_number = tcp_session.add_if_match(tcp_pkt)
+
+        if not session_number:
+            tcp_sessions.append(TCPSession(tcp_pkt, len(tcp_sessions)))
+            Logger.debug('New session ' + str(len(tcp_sessions)))
+            ses_counter.inc()
+
+        return session_number
+        # for tcp_session in tcp_sessions:
+        # tcp_session.print_payload()FILE TCPSession.py
+from ips.logger import Logger
+from multiprocessing import Manager
+
+
+class TCPSession(object):
+
+    def __init__(self, pkt, number):
+        self.length = 0
+        if not hasattr(self, 'pkts'):
+            self.pkts = list()
+        self.pkts.append(pkt)
+        self.session_number = number
+        self.valid = True
+
+    def add_if_match(self, tcp_pkt):
+        # debug(type(pkt))
+        if tcp_pkt is not None and (len(self.pkts) == 0
+                                    or self.pkts[-1].answers(tcp_pkt)
+                                    or tcp_pkt.answers(self.pkts[-1])
+                                    or tcp_pkt.ack == self.pkts[-1].ack
+                                    or tcp_pkt.seq == self.pkts[-1].seq
+                                    or tcp_pkt.seq == self.pkts[-1].ack):
+            self.pkts.append(tcp_pkt)
+            self.length += len(str(tcp_pkt.payload))
+            # Logger.debug("LEN: "+str(self.length))
+            # Logger.debug(str(self.session_number) + ">>>" +str(tcp_pkt.payload))
+            # self.print_payload()
+            return self.session_number
+        return 0
+
+    def print_payload(self):
+        print('SESSION ' + str(self.session_number))
+        for p in self.pkts:
+            print(str(p))
+        print("\n\n")
+
+    def get_pairs(self):
+        for p in self.pkts:
+            pass
+MAIN
+import logging
+
+from prometheus_client import start_http_server, Counter
+
+from ips.Constants import Constants
+from ips.common_analyzer import CommonProcess
+from ips.deep_analyzer import AnalysisProcessor
+from ips.logger import Logger
+
+l = logging.getLogger("scapy.runtime")
+l.setLevel(49)
+
+import netfilterqueue
+from scapy.all import *
+
+common_count = 0
+sessions_count = 0
+
+last_pkt = None
+
+executors = list()
+executor = None
+
+packets = None
+packets_listener = None
+tcp_sessions = None
+cb_listener = None
+callbacks = None
+pkt_counter = None
+counter_drop = None
+bad_sessions = None
+global_direction = None
+ses_counter = None
+
+def process_traffic(payload:netfilterqueue.Packet):
+    global packets
+    global tcp_sessions
+    global cb_listener
+    global callbacks
+    global pkt_counter
+    global ses_counter
+
+    Logger.debug("NEW PACKET!")
+
+    CommonProcess.common_process(payload,
+                                 packets,
+                                 tcp_sessions,
+                                 cb_listener,
+                                 callbacks,
+                                 pkt_counter,
+                                 ses_counter,
+                                 bad_sessions)
+
+
+# @ray.remote
+def start(m):
+    global packets
+    global packets_listener
+    global tcp_sessions
+    global cb_listener
+    global callbacks
+    global pkt_counter
+    global bad_sessions
+    global global_direction
+    global ses_counter
+
+    direction = m[0]
+    global_direction = direction
+    n = m[1]
+    sum = m[2]
+    packets = m[3]
+    tcp_sessions = m[4]
+    cb_listener = m[5]
+    callbacks = m[6]
+    local_ip = m[7]
+    pkt_counter = m[8]
+    ses_counter = m[9]
+    bad_sessions = list()
+
+    # Logger.info("packets_" + direction + "_" + str(n))
+    print("!!"+direction)
+
+    if direction == Constants.DIRECTION_INPUT:
+
+        cmd = ("iptables -t raw -I PREROUTING -d " + local_ip +
+               " -m statistic --mode nth --every " + str(sum)
+               + " --packet " + str(n) + " -j NFQUEUE --queue-num " + str(n))
+
+        cmd2 = ("iptables -t raw -I PREROUTING -d " + local_ip +
+                " -m statistic --mode nth --every " + str(sum)
+                + " --packet " + str(n) + " -j LOG --log-prefix 'INPUT!!!NFQUEUE" + str(n) + "of" + str(sum)
+                + ">>>' --log-level 4")
+        Logger.info(cmd)
+        Logger.info(cmd2)
+        os.system(cmd)
+        # os.system(cmd2)
+
+    else:
+
+        # pkt_counter = Counter("packets_" + direction + "_" + str(n), "", ['protocol', 'port', 'action'])
+        # Logger.info("packets_" + direction + "_" + str(n))
+
+        # start_http_server(10000+n)
+
+        cmd = ("iptables -t mangle -I POSTROUTING -s " + local_ip +
+               " -m statistic --mode nth --every " + str(sum)
+               + " --packet " + str(n) + " -j NFQUEUE --queue-num " + str(sum + n))
+
+        cmd2 = ("iptables -t mangle -I POSTROUTING -s " + local_ip +
+                " -m statistic --mode nth --every " + str(sum)
+                + " --packet " + str(n) + "  -j LOG --log-prefix 'OUTPUT!!!NFQUEUE" + str(n) + "of" + str(sum)
+                + ">>>' --log-level 4")
+        Logger.info(cmd)
+        Logger.info(cmd2)
+        os.system(cmd)
+        # os.system(cmd2)
+
+    q = netfilterqueue.NetfilterQueue()
+    q.bind(n if direction == Constants.DIRECTION_INPUT else n + sum, process_traffic)
+
+    try:
+        Logger.info('starting ' + ('input' if direction == Constants.DIRECTION_INPUT else 'output') + ' on ' + str(n))
+        q.run()
+    except:
+        Logger.info('exiting ' + ('input' if direction == Constants.DIRECTION_INPUT else 'output') + ' on ' + str(n))
+        q.unbind()
+        clear_iptables(local_ip)
+        sys.exit(1)
+
+
+def clear_iptables(local_ip):
+    os.system("iptables -t raw -D PREROUTING -d " + local_ip + "  -j NFQUEUE --queue-num 0")
+    os.system("iptables -t mangle -D POSTROUTING -s " + local_ip + " -j NFQUEUE --queue-num 1")
+    os.system("iptables -t raw -F")
+    os.system("iptables -t mangle -F")
+
+
+def init_iptables(local_ip):
+    os.system("iptables -t raw -I PREROUTING -d " + local_ip + " -j LOG --log-prefix 'INPUT!!!IPS>>>' --log-level 4")
+    os.system(
+        "iptables -t mangle -I POSTROUTING -s " + local_ip + " -j LOG --log-prefix 'OUTPUT!!!IPS>>>' --log-level 4")
+
+
+def main():
+    local_ip = sys.argv[1]
+
+    if not local_ip:
+        sys.exit(1)
+
+    clear_iptables(local_ip)
+    # init_iptables(local_ip)
+    process_count = 1
+
+    # from multiprocessing import Manager
+    # m = Manager()
+
+    tcp_sessions_list = list()
+    tcp_pairs_list = list()
+    packets = list()
+    callbacks = list()
+    start_http_server(9000, addr='192.168.2.17')
+    pkt_counter = Counter("packets", "", ['protocol', 'port', 'action', 'direction'])
+    ses_counter = Counter("sessions", "")
+
+
+    # pkt_proxy, pkt_listener = proxy.createProxy(packets)
+    # cb_proxy, cb_listener = proxy.createProxy(callbacks)
+
+    for d in [Constants.DIRECTION_INPUT, Constants.DIRECTION_OUTPUT]:
+        r = range(0, process_count)
+        for i in r:
+            # proc = Process(target=start,
+            #                args=([d, i, process_count,
+            #                       packets, tcp_sessions_list, cb_listener, callbacks, local_ip],),
+            #                name=str(d) + "_" + str(i))
+            # proc.start()
+            proc = Thread(target=start,
+                           args=([[d, i, process_count,
+                                  packets, tcp_sessions_list, cb_listener, callbacks, local_ip,pkt_counter,
+                                  ses_counter]]),
+                           name=str(d) + "_" + str(i))
+            proc.start()
+
+    analysis_thread = AnalysisProcessor(tcp_pairs_list, tcp_sessions_list, packets)
+    # analysis_thread.start()
+    # start_input()
+    # analysis_thread.stop()
+
+    import time
+    while True:
+        time.sleep(1)
+
+    # sys.exit(1)
+
+
+main()
